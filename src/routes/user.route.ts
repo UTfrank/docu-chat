@@ -1,4 +1,5 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
+import { getUsers, getUser, addUser, updateUser, deleteUser } from "../controllers/user.controller";
 
 const router = Router();
 
@@ -8,38 +9,14 @@ let users = [
   { id: 3, name: "Charlie" },
 ];
 
-router.get("/", (req: Request, res: Response) => {
-  res.json(users);
-});
+router.get("/", getUsers);
 
-router.get("/:id", (req: Request, res: Response) => {
-  const id = Number(req.params.id);
+router.get("/:id", getUser);
 
-  const user = users.find(u => u.id === id);
+router.post("/", addUser);
 
-  if (!user) {
-    res.status(404).json({ message: "User not found" });
-    return;
-  }
+router.put("/:id", updateUser);
 
-  res.json(user);
-})
-
-router.post("/", (req: Request, res: Response) => {
-  const { name, email } = req.body;
-
-  if(!name || !email) {
-    res.status(400).json({ message: "Name and email are required" });
-    return;
-  }
-
-  res.status(201).json({
-    message: "User created successfully",
-    user: {
-      name,
-      email,
-    },
-  });
-});
+router.delete("/:id", deleteUser);
 
 export default router;
