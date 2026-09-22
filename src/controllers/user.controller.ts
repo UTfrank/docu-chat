@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { getAllUsers, getUserById, createNewUser, editUser } from "../services/user.service.js"
 
 let users = [
   { id: 1, name: "Alice" },
@@ -7,35 +8,44 @@ let users = [
 ];
 
 export const getUsers = (req: Request, res: Response) => {
+  const users = getAllUsers();
   res.json(users);
-}
+};
 
 export const getUser = (req: Request, res: Response) => {
-  res.json(users);
-}
+  const userId = Number(req.params.id);
+  const user = getUserById(userId);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.json(user);
+};
 
 export const addUser = (req: Request, res: Response) => {
   const { name, email } = req.body;
 
-  if(!name || !email) {
+  if (!name || !email) {
     res.status(400).json({ message: "Name and email are required" });
     return;
   }
 
+  const newUser = createNewUser({ name})
+
   res.status(201).json({
     message: "User created successfully",
     user: {
-      name,
-      email,
+      name: newUser.name,
     },
   });
-}
+};
 
 export const updateUser = (req: Request, res: Response) => {
   const userId = Number(req.params.id);
-  const user = users.find(u => u.id === userId);
+  const user = users.find((u) => u.id === userId);
 
-  if(!user) {
+  if (!user) {
     res.status(404).json({ message: "User not found" });
     return;
   }
@@ -50,21 +60,20 @@ export const updateUser = (req: Request, res: Response) => {
     message: "User updated successfully",
     user,
   });
-
-}
+};
 
 export const deleteUser = (req: Request, res: Response) => {
   const userId = Number(req.params.id);
-  const user = users.find(u => u.id === userId);
+  const user = users.find((u) => u.id === userId);
 
-  if(!user) {
+  if (!user) {
     res.status(404).json({ message: "User not found" });
     return;
   }
 
-  users = users.filter(u => u.id !== userId);
+  users = users.filter((u) => u.id !== userId);
 
   res.json({
-    message: "User deleted successfully"
-  })
-}
+    message: "User deleted successfully",
+  });
+};

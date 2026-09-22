@@ -1,13 +1,7 @@
 import { Router } from "express";
-import { getUsers, getUser, addUser, updateUser, deleteUser } from "../controllers/user.controller";
+import { getUsers, getUser, addUser, updateUser, deleteUser } from "../controllers/user.controller.js";
 
 const router = Router();
-
-let users = [
-  { id: 1, name: "Alice" },
-  { id: 2, name: "Bob" },
-  { id: 3, name: "Charlie" },
-];
 
 router.get("/", getUsers);
 
