@@ -1,71 +1,47 @@
-import {
-  Product,
-  CreateProductInput,
-  UpdateProductInput,
-} from "../types/product.types.js";
+import { CreateProductInput, UpdateProductInput } from "../schemas/product.schema.js";
+import { prisma } from "../lib/prisma.js";
 
-let products: Product[] = [
-  {
-    id: 1,
-    name: "Laptop",
-    price: 500000,
-  },
-  {
-    id: 2,
-    name: "Phone",
-    price: 250000,
-  },
-];
-
-export const getAllProducts = (): Product[] => {
-  return products;
+export const getAllProducts = async() => {
+  return prisma.product.findMany({
+    orderBy: {
+      id: "asc"
+    }
+  });
 };
 
-export const getProductById = (id: number): Product | undefined => {
-  return products.find((p) => p.id === id);
+export const getProductById = async(id: number) => {
+  return prisma.product.findUnique({
+    where: {
+      id
+    }
+  });
 };
 
-export const createProduct = (input: CreateProductInput): Product => {
-  const newProduct: Product = {
-    id: products.length + 1,
-    name: input.name,
-    price: input.price,
-  };
-
-  products.push(newProduct);
-
-  return newProduct;
+export const createProduct = async(input: CreateProductInput) => {
+  return prisma.product.create({
+    data: {
+      name: input.name,
+      price: input.price
+    }
+  })
 };
 
-export const editProduct = (
+export const editProduct = async(
   id: number,
   input: UpdateProductInput,
-): Product | undefined => {
-  const product = products.find((p) => p.id === id);
-
-  if (!product) {
-    return undefined;
-  }
-
-  if (input.name !== undefined) {
-    product.name = input.name;
-  }
-
-  if (input.price !== undefined) {
-    product.price = input.price;
-  }
-
-  return product;
+) => {
+  return prisma.product.update({
+    where: {
+      id
+    },
+    data: input
+  });
 };
 
-export const removeProduct = (id: number): boolean => {
-  const product = products.some(p => p.id === id);
-
-  if (!product) {
-    return false;
-  }
-
-  products = products.filter(p => p.id !== id);
-
-  return true;
-}
+export const removeProduct = async(id: number) => {
+  return prisma.product.delete({
+    where: {
+      id
+    }
+  });
+};

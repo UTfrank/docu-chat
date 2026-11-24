@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import productRoutes from "./routes/product.route.js";
 import userRoutes from "./routes/user.route.js";
+import { errorHandler } from "./middleware/error.middleware.js";
 
 const app = express();
 app.use(express.json());
@@ -13,5 +14,7 @@ app.get("/", (req: Request, res: Response) => {
     message: "Hello World!",
   });
 });
+
+app.use(errorHandler);
 
 export default app;
