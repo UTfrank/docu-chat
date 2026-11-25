@@ -1,59 +1,44 @@
 import { Request, Response } from "express";
-import { getAllUsers, getUserById, createNewUser, editUser } from "../services/user.service.js"
+import { getAllUsers, getUserById, createNewUser, editUser, removeUser } from "../services/user.service.js"
+import { AppError } from "../utils/app-error.js";
 
-let users = [
-  { id: 1, name: "Alice" },
-  { id: 2, name: "Bob" },
-  { id: 3, name: "Charlie" },
-];
 
-export const getUsers = (req: Request, res: Response) => {
-  const users = getAllUsers();
+export const getUsers = async(req: Request, res: Response) => {
+  const users = await getAllUsers();
   res.json(users);
 };
 
-export const getUser = (req: Request, res: Response) => {
-  const userId = Number(req.params.id);
-  const user = getUserById(userId);
+export const getUser = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  
+  if (Number.isNaN(id)) {
+    throw new AppError("Invalid User ID", 400);
+  }
+
+  const user = await getUserById(id);
 
   if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    throw new AppError("User not found", 404);
   }
 
   res.json(user);
 };
 
-export const addUser = (req: Request, res: Response) => {
-  const { name, email } = req.body;
-
-  if (!name || !email) {
-    res.status(400).json({ message: "Name and email are required" });
-    return;
-  }
-
-  const newUser = createNewUser({ name})
+export const addUser = async (req: Request, res: Response) => {
+  const user = await createNewUser(req.body);
 
   res.status(201).json({
     message: "User created successfully",
-    user: {
-      name: newUser.name,
-    },
+    user,
   });
 };
 
-export const updateUser = (req: Request, res: Response) => {
-  const userId = Number(req.params.id);
-  const user = users.find((u) => u.id === userId);
+export const updateUser = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const user = await editUser(id, req.body);
 
   if (!user) {
-    res.status(404).json({ message: "User not found" });
-    return;
-  }
-
-  const { name } = req.body;
-
-  if (name !== undefined) {
-    user.name = name;
+    throw new AppError("User not found", 404);
   }
 
   res.json({
@@ -62,16 +47,13 @@ export const updateUser = (req: Request, res: Response) => {
   });
 };
 
-export const deleteUser = (req: Request, res: Response) => {
-  const userId = Number(req.params.id);
-  const user = users.find((u) => u.id === userId);
+export const deleteUser = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const deleted = await removeUser(id);
 
-  if (!user) {
-    res.status(404).json({ message: "User not found" });
-    return;
+  if (!deleted) {
+    throw new AppError("User not found", 404);
   }
-
-  users = users.filter((u) => u.id !== userId);
 
   res.json({
     message: "User deleted successfully",

@@ -1,52 +1,44 @@
-import { User, CreateUserInput, UpdateUserInput } from "../types/user.types.js";
+import { CreateUserInput, UpdateUserInput } from "../schemas/user.schema.js";
+import { prisma } from "../lib/prisma.js";
 
-let users = [
-  { id: 1, name: "Alice" },
-  { id: 2, name: "Bob" },
-  { id: 3, name: "Charlie" },
-];
-
-export const getAllUsers = (): User[] => {
-  return users;
+export const getAllUsers = async() => {
+  return prisma.user.findMany({
+    orderBy: {
+      id: "asc"
+    }
+  });
 }
 
-export const getUserById = (id: number): User | undefined => {
-  return users.find(u => u.id === id)
+export const getUserById = async(id: number) => {
+  return prisma.user.findUnique({
+    where: {
+      id
+    }
+  })
 }
 
-export const createNewUser = (input: CreateUserInput): User => {
-  const newUser: User = {
-    id: users.length + 1,
-    name: input.name,
-  };
-
-  users.push(newUser);
-
-  return newUser;
+export const createNewUser = async (input: CreateUserInput) => {
+  return prisma.user.create({
+    data: {
+      name: input.name,
+      email: input.email,
+    }
+  });
 }
 
-export const editUser = (id: number, input: UpdateUserInput): User | undefined => {
-  const user = users.find(u => u.id === id);
-
-  if (!user) {
-    return undefined
-  }
-
-  if (input.name !== undefined) {
-    user.name = input.name
-  }
-
-  return user;
+export const editUser = async (id: number, input: UpdateUserInput) => {
+  return prisma.user.update({
+    where: {
+      id
+    },
+    data: input
+  });
 }
 
-export const removeUser = (id: number): boolean => {
-  const user = users.find(u => u.id === id);
-
-  if (!user) {
-    return false;
-  }
-
-  users = users.filter(u => u.id !== id);
-
-  return true;
+export const removeUser = async (id: number) => {
+  return prisma.user.delete({
+    where: {
+      id
+    }
+  });
 }
